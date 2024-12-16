@@ -19,57 +19,46 @@ Research libraries
 OpenCV: popular library for video and image processing
 MediaPipe: popular library developed by Google for detecting body landmarks.
 """
-def run_pose_detection(viideo_capture=0):
-    """
-    Runs the pose detection pipeline on the given video source
 
-    parameters:
-    - video_source: path to video gile or integer for webcam
+def initialize_pose_detector():
     """
-    # Initialize MediaPipe Pose and Drawing modules
+    Initializes the MediaPipe Pose and Drawing modules.
+
+    :return: Tuple containing the pose object and drawing utility.
+    """
     mp_pose = mp.solutions.pose
-    pose = mp.pose.Pose()
+    pose = mp_pose.Pose()
     mp_drawing = mp.solutions.drawing_utils
+    return pose, mp_drawing
 
-    # Open video capture 
-    cap = cv2.VideoCapture(video_source)
+def process_frame(pose, frame):
+    """
+    Processes a video frame to detect pose landmarks.
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            print("Unable to access the camera of video file.")
-            break
+    :param pose: Initialized MediaPipe Pose object.
+    :param frame: Video frame to process.
+    :return: Processed frame with pose landmarks drawn and pose results.
+    """
+    # Convert the image to RGB as MediaPipe requires RGB input
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Convert the image to RGB because MediaPipe requires RGB input
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # Process the frame to detect poses
+    results = pose.process(rgb_frame)
 
-        # Process the frame to detect poses
-        results = pose.process(rgb_frame)
+    return results
 
-        # Draw the pose landmarks and connections on the frame
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(
-                frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
-            )
-        
-        # Display the frame with annotations 
-        cv2.imshow('Pose Detection', frame)
+def draw_landmarks(frame, results, mp_pose, mp_drawing):
+    """
+    Draws pose landmarks and connections on a video frame.
 
-        # Break the loop on 'q' key press
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.detroyAllWindows()
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Pose Detection Script')
-    parser.add_argument(
-        "--video_source",
-        type=str,
-        default=0,
-        help="Path to video file or webcam index (default: 0 for webcam)."
-    )
-    args = parser.parse_args()
-
-    run_pose_detection(args.video_source)
+    :param frame: Video frame to annotate.
+    :param results: MediaPipe Pose results.
+    :param mp_pose: MediaPipe Pose module.
+    :param mp_drawing: MediaPipe Drawing utilities module.
+    :return: Annotated frame.
+    """
+    if results.pose_landmarks:
+        mp_drawing.draw_landmarks(
+            frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
+        )
+    return frame

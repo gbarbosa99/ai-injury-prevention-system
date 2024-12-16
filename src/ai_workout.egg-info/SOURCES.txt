@@ -1,0 +1,8 @@
+README.md
+setup.py
+src/ai_workout.egg-info/PKG-INFO
+src/ai_workout.egg-info/SOURCES.txt
+src/ai_workout.egg-info/dependency_links.txt
+src/ai_workout.egg-info/top_level.txt
+tests/test_pose_detection.py
+tests/test_risk_analysis.py
